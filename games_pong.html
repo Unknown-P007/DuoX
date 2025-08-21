@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Pong</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .game-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            min-height: 60px;
+        }
+        
+        .score-container {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+        
+        .score {
+            font-size: 48px;
+            font-weight: 600;
+            color: #d0d0d0;
+        }
+        
+        .player1-score {
+            color: #9ca3af;
+        }
+        
+        .player2-score {
+            color: #9ca3af;
+        }
+        
+        .score-separator {
+            font-size: 36px;
+            font-weight: 300;
+            color: #606060;
+        }
+        
+        .game-container {
+            position: relative;
+            border: 2px solid #404040;
+            border-radius: 12px;
+            background: #2a2a2a;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        canvas {
+            display: block;
+            border-radius: 10px;
+            background: #1e1e1e;
+        }
+        
+        .bottom-controls {
+            display: flex;
+            gap: 15px;
+            min-height: 50px;
+        }
+        
+        .control-button {
+            background: #404040;
+            color: #f0f0f0;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .control-button:hover {
+            background: #505050;
+        }
+        
+        .control-button.active {
+            background: #cd7f32;
+        }
+        
+        .menu-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(30, 30, 30, 0.98);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+        
+        .menu-title {
+            font-size: 64px;
+            font-weight: 700;
+            color: #f0f0f0;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+        
+        .menu-subtitle {
+            font-size: 18px;
+            color: #a0a0a0;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .menu-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            color: #c0c0c0;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .button-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .menu-button {
+            background: #404040;
+            color: #f0f0f0;
+            border: none;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 180px;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .menu-button:hover {
+            background: #505050;
+            transform: translateY(-2px);
+        }
+        
+        .menu-button.selected {
+            background: #cd7f32;
+            color: #ffffff;
+        }
+        
+        .small-button {
+            min-width: 120px;
+            padding: 15px 25px;
+            font-size: 16px;
+        }
+        
+        .game-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .center-line {
+            position: absolute;
+            left: 50%;
+            top: 30px;
+            bottom: 30px;
+            width: 3px;
+            background: repeating-linear-gradient(
+                to bottom,
+                #606060 0px,
+                #606060 20px,
+                transparent 20px,
+                transparent 40px
+            );
+            transform: translateX(-50%);
+            opacity: 0.6;
+        }
+        
+        .center-line.horizontal-mode {
+            left: 30px;
+            right: 30px;
+            top: 50%;
+            width: auto;
+            height: 3px;
+            background: repeating-linear-gradient(
+                to right,
+                #606060 0px,
+                #606060 20px,
+                transparent 20px,
+                transparent 40px
+            );
+            transform: translateY(-50%);
+        }
+        
+        .pause-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(30, 30, 30, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 15;
+        }
+        
+        .pause-title {
+            font-size: 48px;
+            font-weight: 600;
+            color: #f0f0f0;
+            margin-bottom: 20px;
+        }
+        
+        .pause-subtitle {
+            font-size: 18px;
+            color: #a0a0a0;
+        }
+        
+        .controls-hint {
+            text-align: center;
+            font-size: 14px;
+            color: #808080;
+            line-height: 1.4;
+            margin-top: 15px;
+        }
+        
+        .winner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(30, 30, 30, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 25;
+        }
+        
+        .winner-title {
+            font-size: 56px;
+            font-weight: 700;
+            color: #f0f0f0;
+            margin-bottom: 30px;
+        }
+        
+        .winner-subtitle {
+            font-size: 18px;
+            color: #a0a0a0;
+            margin-bottom: 30px;
+        }
+        
+        .return-button {
+            background: #404040;
+            color: #f0f0f0;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .return-button:hover {
+            background: #505050;
+            transform: translateY(-2px);
+        }
+        
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .menu-title {
+                font-size: 48px;
+            }
+            
+            .score {
+                font-size: 32px;
+            }
+            
+            .score-separator {
+                font-size: 24px;
+            }
+            
+            .controls-hint {
+                font-size: 12px;
+            }
+            
+            .control-button {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+            
+            .top-controls {
+                gap: 20px;
+            }
+            
+            .score-container {
+                gap: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-wrapper">
+        <!-- Top Controls with Score -->
+        <div class="top-controls" id="topControls" style="display: none;">
+            <div class="score-container">
+                <div class="score player1-score" id="player1Score">0</div>
+                <div class="score-separator">-</div>
+                <div class="score player2-score" id="player2Score">0</div>
+            </div>
+        </div>
+        
+        <!-- Game Container -->
+        <div class="game-container" id="gameContainer">
+            <canvas id="gameCanvas" width="900" height="500"></canvas>
+            
+            <!-- Main Menu -->
+            <div class="menu-overlay" id="menuOverlay">
+                <div class="menu-title">PONG</div>
+                <div class="menu-subtitle">Choose your game mode and orientation</div>
+                
+                <div class="menu-section">
+                    <div class="section-title">Game Mode</div>
+                    <div class="menu-buttons">
+                        <button class="menu-button" id="vsPlayerBtn">VS PLAYER</button>
+                        <button class="menu-button" id="vsComputerBtn">VS COMPUTER</button>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="section-title">Orientation</div>
+                    <div class="button-row">
+                        <button class="menu-button small-button selected" id="horizontalBtn">HORIZONTAL</button>
+                        <button class="menu-button small-button" id="verticalBtn">VERTICAL</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Game UI -->
+            <div class="game-ui" id="gameUI">
+                <div class="center-line" id="centerLine"></div>
+            </div>
+            
+            <!-- Pause Overlay -->
+            <div class="pause-overlay" id="pauseOverlay">
+                <div class="pause-title">PAUSED</div>
+                <div class="pause-subtitle">Press ESC or click Resume to continue</div>
+            </div>
+            
+            <!-- Winner Overlay -->
+            <div class="winner-overlay" id="winnerOverlay">
+                <div class="winner-title" id="winnerTitle">PLAYER 1 WINS!</div>
+                <div class="winner-subtitle">Final Score: 5 - 3</div>
+                <button class="return-button" id="returnToMenuBtn">RETURN TO MENU</button>
+            </div>
+        </div>
+        
+        <!-- Bottom Controls -->
+        <div class="bottom-controls" id="bottomControls" style="display: none;">
+            <button class="control-button" id="pauseResumeBtn">PAUSE</button>
+            <button class="control-button" id="mainMenuBtn">MENU</button>
+        </div>
+        
+        <!-- Controls Hint -->
+        <div class="controls-hint" id="controlsHint" style="display: none;">
+            Player 1: W/S keys | Player 2: ↑/↓ keys | ESC: Pause
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // UI Elements
+        const gameContainer = document.getElementById('gameContainer');
+        const menuOverlay = document.getElementById('menuOverlay');
+        const pauseOverlay = document.getElementById('pauseOverlay');
+        const winnerOverlay = document.getElementById('winnerOverlay');
+        const gameUI = document.getElementById('gameUI');
+        const centerLine = document.getElementById('centerLine');
+        const player1ScoreEl = document.getElementById('player1Score');
+        const player2ScoreEl = document.getElementById('player2Score');
+        const controlsHint = document.getElementById('controlsHint');
+        const winnerTitle = document.getElementById('winnerTitle');
+        const topControls = document.getElementById('topControls');
+        const bottomControls = document.getElementById('bottomControls');
+        
+        // Buttons
+        const vsPlayerBtn = document.getElementById('vsPlayerBtn');
+        const vsComputerBtn = document.getElementById('vsComputerBtn');
+        const horizontalBtn = document.getElementById('horizontalBtn');
+        const verticalBtn = document.getElementById('verticalBtn');
+        const pauseResumeBtn = document.getElementById('pauseResumeBtn');
+        const mainMenuBtn = document.getElementById('mainMenuBtn');
+        const returnToMenuBtn = document.getElementById('returnToMenuBtn');
+
+        // Game state
+        let gameState = 'menu'; // 'menu', 'playing', 'paused', 'gameOver'
+        let gameMode = 'player'; // 'player' or 'computer'
+        let orientation = 'horizontal'; // 'horizontal' or 'vertical'
+        let animationId;
+
+        // Game objects
+        const ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            dx: 0,
+            dy: 0,
+            radius: 8,
+            speed: 6
+        };
+
+        const paddle1 = {
+            x: 30,
+            y: canvas.height / 2 - 50,
+            width: 12,
+            height: 100,
+            speed: 7
+        };
+
+        const paddle2 = {
+            x: canvas.width - 42,
+            y: canvas.height / 2 - 50,
+            width: 12,
+            height: 100,
+            speed: 7,
+            aiSpeed: 5
+        };
+
+        const game = {
+            player1Score: 0,
+            player2Score: 0,
+            maxScore: 5
+        };
+
+        // Input handling
+        const keys = {};
+        
+        document.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+            
+            if (e.code === 'Escape') {
+                e.preventDefault();
+                togglePause();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
+
+        // Button event listeners
+        vsPlayerBtn.addEventListener('click', () => {
+            gameMode = 'player';
+            updateControlsHint();
+            startGame();
+        });
+
+        vsComputerBtn.addEventListener('click', () => {
+            gameMode = 'computer';
+            updateControlsHint();
+            startGame();
+        });
+
+        horizontalBtn.addEventListener('click', () => {
+            orientation = 'horizontal';
+            horizontalBtn.classList.add('selected');
+            verticalBtn.classList.remove('selected');
+            updateOrientation();
+        });
+
+        verticalBtn.addEventListener('click', () => {
+            orientation = 'vertical';
+            verticalBtn.classList.add('selected');
+            horizontalBtn.classList.remove('selected');
+            updateOrientation();
+        });
+
+        pauseResumeBtn.addEventListener('click', () => {
+            togglePause();
+        });
+
+        mainMenuBtn.addEventListener('click', () => {
+            showMenu();
+        });
+
+        returnToMenuBtn.addEventListener('click', () => {
+            showMenu();
+        });
+
+        function updateOrientation() {
+            if (orientation === 'vertical') {
+                canvas.width = 500;
+                canvas.height = 900;
+                centerLine.classList.add('horizontal-mode');
+                
+                // Adjust paddle positions for vertical mode
+                paddle1.x = canvas.width / 2 - 50;
+                paddle1.y = 30;
+                paddle1.width = 100;
+                paddle1.height = 12;
+                
+                paddle2.x = canvas.width / 2 - 50;
+                paddle2.y = canvas.height - 42;
+                paddle2.width = 100;
+                paddle2.height = 12;
+            } else {
+                canvas.width = 900;
+                canvas.height = 500;
+                centerLine.classList.remove('horizontal-mode');
+                
+                // Reset paddle positions for horizontal mode
+                paddle1.x = 30;
+                paddle1.y = canvas.height / 2 - 50;
+                paddle1.width = 12;
+                paddle1.height = 100;
+                
+                paddle2.x = canvas.width - 42;
+                paddle2.y = canvas.height / 2 - 50;
+                paddle2.width = 12;
+                paddle2.height = 100;
+            }
+            
+            // Reset ball position
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            
+            if (gameState !== 'menu') {
+                resetBall();
+            }
+        }
+
+        function updateControlsHint() {
+            if (orientation === 'vertical') {
+                if (gameMode === 'player') {
+                    controlsHint.textContent = 'Player 1: A/D keys | Player 2: ←/→ keys | ESC: Pause';
+                } else {
+                    controlsHint.textContent = 'Player: A/D keys | ESC: Pause';
+                }
+            } else {
+                if (gameMode === 'player') {
+                    controlsHint.textContent = 'Player 1: W/S keys | Player 2: ↑/↓ keys | ESC: Pause';
+                } else {
+                    controlsHint.textContent = 'Player: W/S keys | ESC: Pause';
+                }
+            }
+        }
+
+        function togglePause() {
+            if (gameState === 'playing') {
+                pauseGame();
+            } else if (gameState === 'paused') {
+                resumeGame();
+            }
+        }
+
+        function showMenu() {
+            gameState = 'menu';
+            menuOverlay.style.display = 'flex';
+            winnerOverlay.style.display = 'none';
+            pauseOverlay.style.display = 'none';
+            topControls.style.display = 'none';
+            bottomControls.style.display = 'none';
+            controlsHint.style.display = 'none';
+            
+            // Reset scores
+            game.player1Score = 0;
+            game.player2Score = 0;
+            player1ScoreEl.textContent = '0';
+            player2ScoreEl.textContent = '0';
+            
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        }
+
+        function startGame() {
+            gameState = 'playing';
+            menuOverlay.style.display = 'none';
+            winnerOverlay.style.display = 'none';
+            pauseOverlay.style.display = 'none';
+            topControls.style.display = 'flex';
+            bottomControls.style.display = 'flex';
+            controlsHint.style.display = 'block';
+            pauseResumeBtn.textContent = 'PAUSE';
+            
+            resetBall();
+            gameLoop();
+        }
+
+        function pauseGame() {
+            gameState = 'paused';
+            pauseOverlay.style.display = 'flex';
+            pauseResumeBtn.textContent = 'RESUME';
+            cancelAnimationFrame(animationId);
+        }
+
+        function resumeGame() {
+            gameState = 'playing';
+            pauseOverlay.style.display = 'none';
+            pauseResumeBtn.textContent = 'PAUSE';
+            gameLoop();
+        }
+
+        function resetBall() {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            
+            if (orientation === 'vertical') {
+                const angle = (Math.random() - 0.5) * Math.PI / 3;
+                const direction = Math.random() < 0.5 ? 1 : -1;
+                ball.dx = Math.sin(angle) * ball.speed;
+                ball.dy = Math.cos(angle) * ball.speed * direction;
+            } else {
+                const angle = (Math.random() - 0.5) * Math.PI / 3;
+                const direction = Math.random() < 0.5 ? 1 : -1;
+                ball.dx = Math.cos(angle) * ball.speed * direction;
+                ball.dy = Math.sin(angle) * ball.speed;
+            }
+        }
+
+        function updatePaddles() {
+            if (orientation === 'vertical') {
+                // Vertical mode controls
+                if (keys['KeyA'] && paddle1.x > 0) {
+                    paddle1.x -= paddle1.speed;
+                }
+                if (keys['KeyD'] && paddle1.x < canvas.width - paddle1.width) {
+                    paddle1.x += paddle1.speed;
+                }
+
+                if (gameMode === 'player') {
+                    if (keys['ArrowLeft'] && paddle2.x > 0) {
+                        paddle2.x -= paddle2.speed;
+                    }
+                    if (keys['ArrowRight'] && paddle2.x < canvas.width - paddle2.width) {
+                        paddle2.x += paddle2.speed;
+                    }
+                } else {
+                    // AI for vertical mode
+                    const paddleCenter = paddle2.x + paddle2.width / 2;
+                    const ballCenter = ball.x;
+                    
+                    if (paddleCenter < ballCenter - 10) {
+                        paddle2.x += paddle2.aiSpeed;
+                    } else if (paddleCenter > ballCenter + 10) {
+                        paddle2.x -= paddle2.aiSpeed;
+                    }
+                    
+                    paddle2.x = Math.max(0, Math.min(canvas.width - paddle2.width, paddle2.x));
+                }
+            } else {
+                // Horizontal mode controls
+                if (keys['KeyW'] && paddle1.y > 0) {
+                    paddle1.y -= paddle1.speed;
+                }
+                if (keys['KeyS'] && paddle1.y < canvas.height - paddle1.height) {
+                    paddle1.y += paddle1.speed;
+                }
+
+                if (gameMode === 'player') {
+                    if (keys['ArrowUp'] && paddle2.y > 0) {
+                        paddle2.y -= paddle2.speed;
+                    }
+                    if (keys['ArrowDown'] && paddle2.y < canvas.height - paddle2.height) {
+                        paddle2.y += paddle2.speed;
+                    }
+                } else {
+                    // AI for horizontal mode
+                    const paddleCenter = paddle2.y + paddle2.height / 2;
+                    const ballCenter = ball.y;
+                    
+                    if (paddleCenter < ballCenter - 10) {
+                        paddle2.y += paddle2.aiSpeed;
+                    } else if (paddleCenter > ballCenter + 10) {
+                        paddle2.y -= paddle2.aiSpeed;
+                    }
+                    
+                    paddle2.y = Math.max(0, Math.min(canvas.height - paddle2.height, paddle2.y));
+                }
+            }
+        }
+
+        function updateBall() {
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+
+            if (orientation === 'vertical') {
+                // Vertical mode collisions
+                // Left/right walls
+                if (ball.x - ball.radius <= 0 || ball.x + ball.radius >= canvas.width) {
+                    ball.dx = -ball.dx;
+                }
+
+                // Paddle 1 collision (top)
+                if (ball.y - ball.radius <= paddle1.y + paddle1.height &&
+                    ball.x >= paddle1.x && ball.x <= paddle1.x + paddle1.width &&
+                    ball.dy < 0) {
+                    
+                    ball.dy = -ball.dy;
+                    const hitPos = (ball.x - (paddle1.x + paddle1.width / 2)) / (paddle1.width / 2);
+                    ball.dx = hitPos * ball.speed * 0.75;
+                }
+
+                // Paddle 2 collision (bottom)
+                if (ball.y + ball.radius >= paddle2.y &&
+                    ball.x >= paddle2.x && ball.x <= paddle2.x + paddle2.width &&
+                    ball.dy > 0) {
+                    
+                    ball.dy = -ball.dy;
+                    const hitPos = (ball.x - (paddle2.x + paddle2.width / 2)) / (paddle2.width / 2);
+                    ball.dx = hitPos * ball.speed * 0.75;
+                }
+
+                // Scoring
+                if (ball.y < 0) {
+                    game.player2Score++;
+                    player2ScoreEl.textContent = game.player2Score;
+                    checkGameEnd();
+                    if (gameState === 'playing') resetBall();
+                }
+
+                if (ball.y > canvas.height) {
+                    game.player1Score++;
+                    player1ScoreEl.textContent = game.player1Score;
+                    checkGameEnd();
+                    if (gameState === 'playing') resetBall();
+                }
+            } else {
+                // Horizontal mode collisions
+                // Top/bottom walls
+                if (ball.y - ball.radius <= 0 || ball.y + ball.radius >= canvas.height) {
+                    ball.dy = -ball.dy;
+                }
+
+                // Paddle 1 collision (left)
+                if (ball.x - ball.radius <= paddle1.x + paddle1.width &&
+                    ball.y >= paddle1.y && ball.y <= paddle1.y + paddle1.height &&
+                    ball.dx < 0) {
+                    
+                    ball.dx = -ball.dx;
+                    const hitPos = (ball.y - (paddle1.y + paddle1.height / 2)) / (paddle1.height / 2);
+                    ball.dy = hitPos * ball.speed * 0.75;
+                }
+
+                // Paddle 2 collision (right)
+                if (ball.x + ball.radius >= paddle2.x &&
+                    ball.y >= paddle2.y && ball.y <= paddle2.y + paddle2.height &&
+                    ball.dx > 0) {
+                    
+                    ball.dx = -ball.dx;
+                    const hitPos = (ball.y - (paddle2.y + paddle2.height / 2)) / (paddle2.height / 2);
+                    ball.dy = hitPos * ball.speed * 0.75;
+                }
+
+                // Scoring
+                if (ball.x < 0) {
+                    game.player2Score++;
+                    player2ScoreEl.textContent = game.player2Score;
+                    checkGameEnd();
+                    if (gameState === 'playing') resetBall();
+                }
+
+                if (ball.x > canvas.width) {
+                    game.player1Score++;
+                    player1ScoreEl.textContent = game.player1Score;
+                    checkGameEnd();
+                    if (gameState === 'playing') resetBall();
+                }
+            }
+        }
+
+        function checkGameEnd() {
+            if (game.player1Score >= game.maxScore) {
+                endGame('PLAYER 1 WINS!');
+            } else if (game.player2Score >= game.maxScore) {
+                if (gameMode === 'player') {
+                    endGame('PLAYER 2 WINS!');
+                } else {
+                    endGame('COMPUTER WINS!');
+                }
+            }
+        }
+
+        function endGame(winner) {
+            gameState = 'gameOver';
+            winnerTitle.textContent = winner;
+            winnerOverlay.querySelector('.winner-subtitle').textContent = 
+                `Final Score: ${game.player1Score} - ${game.player2Score}`;
+            winnerOverlay.style.display = 'flex';
+            cancelAnimationFrame(animationId);
+        }
+
+        function render() {
+            // Clear canvas
+            ctx.fillStyle = '#1e1e1e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw paddles
+            ctx.fillStyle = '#d0d0d0';
+            ctx.fillRect(paddle1.x, paddle1.y, paddle1.width, paddle1.height);
+            ctx.fillRect(paddle2.x, paddle2.y, paddle2.width, paddle2.height);
+
+            // Draw ball with Claude's orange color
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#cd7f32'; // Claude's orange color
+            ctx.fill();
+        }
+
+        function gameLoop() {
+            if (gameState === 'playing') {
+                updatePaddles();
+                updateBall();
+                render();
+                animationId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // Initialize
+        updateOrientation();
+        showMenu();
+        render();
+    </script>
+</body>
+</html>
