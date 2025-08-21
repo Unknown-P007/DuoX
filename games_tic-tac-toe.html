@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tic-Tac-Toe</title>
     <style>
         * {
@@ -13,169 +14,271 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             text-align: center;
-            background-color: #1a1a1a;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: #e5e5e5;
+            color: #ffffff;
+            padding: 20px;
         }
 
         .container {
-            background-color: #2d2d2d;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-            border: 1px solid #404040;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 420px;
+            position: relative;
         }
 
+
+
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-            color: #f5f5f5;
-            font-weight: 600;
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            color: #ffffff;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .board {
             display: grid;
-            grid-template-columns: repeat(3, 120px);
-            gap: 8px;
+            grid-template-columns: repeat(3, 90px);
+            gap: 12px;
             justify-content: center;
-            margin: 30px 0;
+            margin: 25px 0;
             padding: 20px;
-            background-color: #353535;
-            border-radius: 8px;
-            border: 1px solid #505050;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .cell {
-            width: 120px;
-            height: 120px;
-            font-size: 3rem;
+            width: 90px;
+            height: 90px;
+            font-size: 2.5rem;
             font-weight: bold;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #404040;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 18px;
             cursor: pointer;
             user-select: none;
-            transition: background-color 0.2s ease;
-            border: 1px solid #555555;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .cell:hover {
-            background-color: #4a4a4a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 1);
         }
 
         .cell:active {
-            background-color: #383838;
+            transform: translateY(0);
         }
 
         .cell.x {
-            color: #d4a574;
+            color: #dc3545;
+            background: linear-gradient(135deg, #fff5f5, #ffe6e6);
+            border-color: #dc3545;
         }
 
         .cell.o {
-            color: #7bb3d4;
+            color: #007bff;
+            background: linear-gradient(135deg, #f0f8ff, #e6f3ff);
+            border-color: #007bff;
         }
 
         .cell.winning {
-            background-color: #4a5d3a;
-            border: 2px solid #6b8c4a;
+            animation: winPulse 1s infinite alternate;
+            border: 3px solid #28a745;
+            box-shadow: 0 0 20px rgba(40, 167, 69, 0.5);
+        }
+
+        @keyframes winPulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
         }
 
         #status {
-            font-size: 1.4rem;
-            font-weight: 500;
+            font-size: 1.3rem;
+            font-weight: 600;
             margin: 20px 0;
-            min-height: 40px;
+            min-height: 35px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #cccccc;
+            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
         #status.winner {
-            font-size: 1.6rem;
-            color: #90c695;
+            font-size: 1.5rem;
+            color: #28a745;
+            animation: celebration 0.6s ease;
         }
 
         #status.draw {
-            color: #d4a574;
+            color: #ffc107;
         }
 
-        button {
+        @keyframes celebration {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .game-button {
             padding: 12px 24px;
-            font-size: 1.1rem;
-            font-weight: 500;
+            font-size: 1rem;
+            font-weight: 600;
             border: none;
-            border-radius: 6px;
-            background-color: #555555;
-            color: #e5e5e5;
+            border-radius: 16px;
+            background: #1a1a1a;
+            color: white;
             cursor: pointer;
-            transition: background-color 0.2s ease;
-            border: 1px solid #666666;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            margin: 0 5px;
         }
 
-        button:hover {
-            background-color: #666666;
+        .game-button:hover {
+            background: #2d2d2d;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
 
-        button:active {
-            background-color: #4a4a4a;
+        .game-button:active {
+            transform: translateY(0);
         }
 
         .score-board {
             display: flex;
             justify-content: space-around;
             margin-top: 20px;
-            padding: 15px;
-            background-color: #353535;
-            border-radius: 8px;
-            border: 1px solid #505050;
+            padding: 20px;
+            background: #1a1a1a;
+            border-radius: 20px;
+            border: 1px solid #333;
         }
 
         .score {
             text-align: center;
-            font-weight: 500;
-        }
-
-        .score-label {
-            font-size: 0.9rem;
-            color: #b0b0b0;
-            margin-bottom: 5px;
-        }
-
-        .score-value {
-            font-size: 1.4rem;
             font-weight: 600;
         }
 
-        .player-x { color: #d4a574; }
-        .player-o { color: #7bb3d4; }
-        .draws { color: #999999; }
+        .score-label {
+            font-size: 0.85rem;
+            color: #cccccc;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
+        .score-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        /* Mobile Responsiveness */
         @media (max-width: 480px) {
             .container {
                 padding: 20px;
-                margin: 20px;
+                margin: 10px;
+                border-radius: 20px;
             }
             
             .board {
-                grid-template-columns: repeat(3, 90px);
-                gap: 6px;
+                grid-template-columns: repeat(3, 75px);
+                gap: 10px;
+                padding: 15px;
             }
             
             .cell {
-                width: 90px;
-                height: 90px;
-                font-size: 2.2rem;
+                width: 75px;
+                height: 75px;
+                font-size: 2rem;
+                border-radius: 15px;
             }
             
             h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
+            }
+
+            #status {
+                font-size: 1.1rem;
+            }
+
+            .score-value {
+                font-size: 1.5rem;
+            }
+
+            .game-button {
+                padding: 10px 18px;
+                font-size: 0.9rem;
+            }
+
+            .menu-dropdown {
+                right: 10px;
+                top: 55px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .board {
+                grid-template-columns: repeat(3, 65px);
+                gap: 8px;
+            }
+            
+            .cell {
+                width: 65px;
+                height: 65px;
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Tablet Responsiveness */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .container {
+                max-width: 500px;
+            }
+
+            .board {
+                grid-template-columns: repeat(3, 100px);
+                gap: 15px;
+            }
+            
+            .cell {
+                width: 100px;
+                height: 100px;
+                font-size: 2.8rem;
+            }
+        }
+
+        /* Desktop Enhancements */
+        @media (min-width: 769px) {
+            .container {
+                max-width: 450px;
+            }
+
+            .cell:hover {
+                transform: translateY(-3px) scale(1.02);
             }
         }
     </style>
@@ -185,7 +288,11 @@
         <h1>Tic-Tac-Toe</h1>
         <div class="board" id="board"></div>
         <p id="status">Player X's turn</p>
-        <button onclick="resetGame()">🔄 New Game</button>
+        
+        <div class="button-group">
+            <button class="game-button" onclick="resetGame()">New Game</button>
+            <button class="game-button" onclick="resetScores()">Reset Scores</button>
+        </div>
         
         <div class="score-board">
             <div class="score player-x">
@@ -209,12 +316,14 @@
         const scoreXElement = document.getElementById("scoreX");
         const scoreOElement = document.getElementById("scoreO");
         const scoreDrawElement = document.getElementById("scoreDraw");
+        const menuElement = document.getElementById("menu");
         
         let board = ["", "", "", "", "", "", "", "", ""];
         let currentPlayer = "X";
         let gameActive = true;
         let scores = { X: 0, O: 0, draw: 0 };
         let winningCells = [];
+        let isDarkTheme = true;
 
         function renderBoard() {
             boardElement.innerHTML = "";
@@ -247,6 +356,7 @@
             if (gameActive) {
                 currentPlayer = currentPlayer === "X" ? "O" : "X";
                 statusElement.textContent = `Player ${currentPlayer}'s turn`;
+                statusElement.classList.remove("winner", "draw");
             }
             renderBoard();
         }
@@ -261,7 +371,7 @@
             for (const [a, b, c] of winPatterns) {
                 if (board[a] && board[a] === board[b] && board[a] === board[c]) {
                     winningCells = [a, b, c];
-                    statusElement.textContent = `Player ${board[a]} wins!`;
+                    statusElement.textContent = `🎉 Player ${board[a]} Wins! 🎉`;
                     statusElement.classList.add("winner");
                     gameActive = false;
                     scores[board[a]]++;
@@ -271,7 +381,7 @@
             }
 
             if (!board.includes("")) {
-                statusElement.textContent = "It's a draw!";
+                statusElement.textContent = "🤝 It's a Draw! 🤝";
                 statusElement.classList.add("draw");
                 gameActive = false;
                 scores.draw++;
@@ -294,6 +404,33 @@
             statusElement.classList.remove("winner", "draw");
             renderBoard();
         }
+
+        function resetScores() {
+            scores = { X: 0, O: 0, draw: 0 };
+            updateScoreboard();
+        }
+
+        function toggleMenu() {
+            menuElement.classList.toggle("show");
+        }
+
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            const body = document.body;
+            
+            if (!isDarkTheme) {
+                body.style.background = "linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%)";
+            } else {
+                body.style.background = "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)";
+            }
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.menu-btn') && !event.target.closest('.menu-dropdown')) {
+                menuElement.classList.remove('show');
+            }
+        });
 
         // Initialize the game
         renderBoard();
