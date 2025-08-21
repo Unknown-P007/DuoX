@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2-Player Games Hub</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1a1a1a;
+      min-height: 100vh;
+      color: #ffffff;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Login Button Styles */
+    .login-section {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .login-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #2a2a2a;
+      border: 2px solid #333333;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .login-btn:hover {
+      background: #3a3a3a;
+      border-color: #ffffff;
+      transform: translateY(-2px);
+    }
+
+    .google-icon {
+      width: 20px;
+      height: 20px;
+      background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIyLjU2IDEyLjI1QzIyLjU2IDExLjQ3IDIyLjQ5IDEwLjcyIDIyLjM2IDEwSDEyVjE0LjI1SDE3Ljk2QzE3LjY2IDE1LjcyIDE2Ljc2IDE2Ljg4IDE1LjM4IDE3LjU4VjIwLjU4SDE5LjA4QzIxLjMzIDE4LjUyIDIyLjU2IDE1LjY2IDIyLjU2IDEyLjI1WiIgZmlsbD0iIzQyODVGNCIvPgo8cGF0aCBkPSJNMTIgMjMuMjVDMTUuMjQgMjMuMjUgMTcuOTUgMjIuMjIgMTkuMDggMjAuNThMMTUuMzggMTcuNThDMTQuMzUgMTguMjUgMTMuMDMgMTguNjMgMTIgMTguNjNDOC44OCAxOC42MyA2LjIyIDE2LjU1IDUuMjcgMTMuNzVIMS4yN1YxNi44M0MzLjUxIDIxLjMgNy41NiAyMy4yNSAxMiAyMy4yNVoiIGZpbGw9IiMzNEE4NTMiLz4KPHBhdGggZD0iTTUuMjcgMTMuNzVDNS4wMiAxMy4xMSA0Ljg4IDEyLjU2IDQuODggMTJTNS4wMiAxMC44OSA1LjI3IDEwLjI1VjcuMTdIMS4yN0MwLjQ2IDguNjggMCA5LjkgMCAxMlMwLjQ2IDE1LjMyIDEuMjcgMTYuODNMNS4yNyAxMy43NVoiIGZpbGw9IiNGQkJDMDQiLz4KPHBhdGggZD0iTTEyIDUuMzdDMTMuNDggNS4zNyAxNC43OSA1LjkgMTUuNzYgNi44Mkw5LjQzIDEwLjE2QzguNDggNy4yMiAxMC4xNiA1LjM3IDEyIDUuMzdaIiBmaWxsPSIjRUE0MzM1Ii8+Cjwvc3ZnPgo=') no-repeat center;
+      background-size: contain;
+    }
+
+    /* User Profile Styles (when logged in) */
+    .user-profile {
+      display: none;
+      align-items: center;
+      gap: 15px;
+      background: #2a2a2a;
+      border: 2px solid #333333;
+      border-radius: 25px;
+      padding: 8px 20px 8px 8px;
+    }
+
+    .user-profile.active {
+      display: flex;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #333333;
+      object-fit: cover;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .user-email {
+      font-size: 12px;
+      color: #cccccc;
+    }
+
+    .logout-btn {
+      background: transparent;
+      border: 1px solid #555555;
+      color: #cccccc;
+      padding: 6px 12px;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-left: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      border-color: #ffffff;
+      color: #ffffff;
+    }
+
+    /* Stats Panel (when logged in) */
+    .stats-panel {
+      display: none;
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: #2a2a2a;
+      border: 2px solid #333333;
+      border-radius: 15px;
+      padding: 20px;
+      min-width: 250px;
+      z-index: 999;
+    }
+
+    .stats-panel.active {
+      display: block;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .stats-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #ffffff;
+      border-bottom: 1px solid #333333;
+      padding-bottom: 8px;
+    }
+
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .stat-label {
+      color: #cccccc;
+    }
+
+    .stat-value {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      border-bottom: 2px solid #333333;
+      padding-bottom: 30px;
+      padding-top: 60px; /* Add space for login button */
+    }
+
+    .title {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: #cccccc;
+      margin-bottom: 30px;
+    }
+
+    .search-box {
+      max-width: 400px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 15px 20px;
+      border: 2px solid #333333;
+      border-radius: 25px;
+      font-size: 16px;
+      background: #2a2a2a;
+      color: #ffffff;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    .search-input::placeholder {
+      color: #888888;
+    }
+    
+    .search-input:focus {
+      border-color: #ffffff;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-top: 50px;
+    }
+
+    .game-card {
+      background: #2a2a2a;
+      border: 2px solid #333333;
+      border-radius: 15px;
+      padding: 30px;
+      text-decoration: none;
+      color: #ffffff;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .game-card:hover {
+      background: #3a3a3a;
+      border-color: #ffffff;
+      transform: translateY(-5px);
+    }
+
+    .game-icon {
+      width: 80px;
+      height: 80px;
+      background: #333333;
+      color: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 2rem;
+      transition: background-color 0.3s ease;
+    }
+
+    .game-card:hover .game-icon {
+      background: #444444;
+    }
+
+    .game-name {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .game-description {
+      font-size: 1rem;
+      margin-bottom: 15px;
+      line-height: 1.5;
+      color: #cccccc;
+    }
+
+    .game-tags {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      background: #333333;
+      color: #ffffff;
+      padding: 8px 15px;
+      border: 1px solid #444444;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .game-card:hover .tag {
+      background: #444444;
+      border-color: #ffffff;
+    }
+
+    /* Game score display for logged in users */
+    .game-score {
+      font-size: 0.9rem;
+      color: #888888;
+      margin-bottom: 10px;
+    }
+
+    .coming-soon {
+      opacity: 0.6;
+      cursor: not-allowed;
+      position: relative;
+    }
+
+    .coming-soon::after {
+      content: 'Coming Soon';
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #666666;
+      color: #ffffff;
+      padding: 8px 15px;
+      border-radius: 15px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      border: 1px solid #888888;
+    }
+
+    .coming-soon:hover {
+      background: #333333;
+      transform: translateY(-2px);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 60px;
+      color: #888888;
+      font-size: 0.9rem;
+      border-top: 2px solid #333333;
+      padding-top: 30px;
+    }
+
+    @media (max-width: 768px) {
+      .login-section {
+        position: relative;
+        top: 0;
+        right: 0;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .stats-panel {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin: 20px auto;
+        max-width: 300px;
+      }
+      
+      .title {
+        font-size: 2rem;
+      }
+      
+      .games-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .game-card {
+        padding: 20px;
+      }
+
+      header {
+        padding-top: 20px;
+      }
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Section -->
+  <div class="login-section">
+    <!-- Login Button (shown when not logged in) -->
+    <button class="login-btn" id="loginBtn" onclick="signInWithGoogle()">
+      <div class="google-icon"></div>
+      Sign in with Google
+    </button>
+
+    <!-- User Profile (shown when logged in) -->
+    <div class="user-profile" id="userProfile">
+      <img class="user-avatar" id="userAvatar" src="" alt="User Avatar">
+      <div class="user-info">
+        <div class="user-name" id="userName">User Name</div>
+        <div class="user-email" id="userEmail">user@example.com</div>
+      </div>
+      <button class="logout-btn" onclick="signOut()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- Stats Panel (shown when logged in) -->
+  <div class="stats-panel" id="statsPanel">
+    <div class="stats-title">📊 Your Stats</div>
+    <div class="stat-item">
+      <span class="stat-label">Games Played:</span>
+      <span class="stat-value" id="gamesPlayed">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Total Wins:</span>
+      <span class="stat-value" id="totalWins">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Win Rate:</span>
+      <span class="stat-value" id="winRate">0%</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Play Time:</span>
+      <span class="stat-value" id="playTime">0h</span>
+    </div>
+  </div>
+  
+  <div class="container">
+    <header>
+      <h1 class="title">🎮 2-Player Games</h1>
+      <p class="subtitle">Choose your game and challenge a friend!</p>
+      
+      <div class="search-box">
+        <input 
+          type="text" 
+          class="search-input" 
+          id="searchInput"
+          placeholder="🔍 Search games..."
+        >
+      </div>
+    </header>
+
+    <main class="games-grid" id="gamesGrid">
+      <!-- Pong -->
+      <a href="games_pong.html" class="game-card" data-tags="classic arcade paddle" onclick="handleGameClick(event, 'pong')">
+        <div class="game-icon">🏓</div>
+        <div class="game-name">Pong</div>
+        <div class="game-score" id="pongScore" style="display: none;">Best Score: 0</div>
+        <div class="game-description">Classic paddle game. First to score 10 points wins!</div>
+        <div class="game-tags">
+          <span class="tag">Classic</span>
+          <span class="tag">Same Screen</span>
+          <span class="tag">Quick</span>
+        </div>
+      </a>
+
+      <!-- Snake VS -->
+      <a href="games_snake-vs.html" class="game-card" data-tags="snake arcade retro" onclick="handleGameClick(event, 'snake')">
+        <div class="game-icon">🐍</div>
+        <div class="game-name">Snake VS</div>
+        <div class="game-score" id="snakeScore" style="display: none;">Best Score: 0</div>
+        <div class="game-description">Two snakes, one arena. Don't crash into each other!</div>
+        <div class="game-tags">
+          <span class="tag">Arcade</span>
+          <span class="tag">Same Screen</span>
+          <span class="tag">Retro</span>
+        </div>
+      </a>
+
+      <!-- Tic-Tac-Toe -->
+      <a href="games_tic-tac-toe.html" class="game-card" data-tags="board strategy classic" onclick="handleGameClick(event, 'tictactoe')">
+        <div class="game-icon">⭕</div>
+        <div class="game-name">Tic-Tac-Toe</div>
+        <div class="game-score" id="tictactoeScore" style="display: none;">Wins: 0</div>
+        <div class="game-description">Get three in a row to win this timeless classic!</div>
+        <div class="game-tags">
+          <span class="tag">Board Game</span>
+          <span class="tag">Strategy</span>
+          <span class="tag">Classic</span>
+        </div>
+      </a>
+
+      <!-- Sprint Race -->
+      <a href="games_race.html" class="game-card" data-tags="racing cars speed" onclick="handleGameClick(event, 'race')">
+        <div class="game-icon">🏎️</div>
+        <div class="game-name">Sprint Race</div>
+        <div class="game-score" id="raceScore" style="display: none;">Best Time: --:--</div>
+        <div class="game-description">Race to the finish line while avoiding obstacles!</div>
+        <div class="game-tags">
+          <span class="tag">Racing</span>
+          <span class="tag">Fast Paced</span>
+          <span class="tag">Action</span>
+        </div>
+      </a>
+
+      <!-- Tank Duel - Coming Soon -->
+      <a href="#" class="game-card coming-soon" data-tags="action shooter tanks">
+        <div class="game-icon">🚀</div>
+        <div class="game-name">Tank Duel</div>
+        <div class="game-description">Battle with tanks in online multiplayer mode!</div>
+        <div class="game-tags">
+          <span class="tag">Action</span>
+          <span class="tag">Online</span>
+          <span class="tag">Shooter</span>
+        </div>
+      </a>
+
+      <!-- Chess - Coming Soon -->
+      <a href="#" class="game-card coming-soon" data-tags="chess strategy board">
+        <div class="game-icon">♟️</div>
+        <div class="game-name">Chess</div>
+        <div class="game-description">Classic chess with online multiplayer support!</div>
+        <div class="game-tags">
+          <span class="tag">Strategy</span>
+          <span class="tag">Board Game</span>
+          <span class="tag">Online</span>
+        </div>
+      </a>
+    </main>
+
+    <footer class="footer">
+      <p>💡 Tip: Suggest me new games...</p>
+    </footer>
+  </div>
+
+  <script>
+    // User data management
+    let userData = {
+      profile: null,
+      stats: {
+        gamesPlayed: 0,
+        totalWins: 0,
+        playTime: 0,
+        gameScores: {
+          pong: 0,
+          snake: 0,
+          tictactoe: 0,
+          race: '--:--'
+        }
+      }
+    };
+
+    let isLoggedIn = false;
+
+    // Mock Google Sign-In
+    function signInWithGoogle() {
+      const btn = document.getElementById('loginBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<div class="google-icon"></div>Signing in...';
+      btn.disabled = true;
+      
+      setTimeout(() => {
+        const mockUser = {
+          id: '123456789',
+          name: 'John Doe',
+          email: 'john.doe@gmail.com',
+          picture: 'https://via.placeholder.com/100x100/333333/ffffff?text=JD'
+        };
+        
+        handleSignInSuccess(mockUser);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }, 1500);
+    }
+
+    function handleSignInSuccess(user) {
+      userData.profile = user;
+      isLoggedIn = true;
+      
+      // Load mock user data
+      loadUserData();
+      
+      // Update UI
+      updateUI();
+      
+      // Show success message
+      showNotification('✅ Successfully signed in with Google!');
+    }
+
+    function loadUserData() {
+      // Simulate loading saved data
+      const savedData = {
+        gamesPlayed: Math.floor(Math.random() * 50) + 10,
+        totalWins: Math.floor(Math.random() * 25) + 5,
+        playTime: Math.floor(Math.random() * 20) + 2,
+        gameScores: {
+          pong: Math.floor(Math.random() * 15) + 5,
+          snake: Math.floor(Math.random() * 200) + 50,
+          tictactoe: Math.floor(Math.random() * 10) + 3,
+          race: (Math.random() * 60 + 30).toFixed(2) + 's'
+        }
+      };
+      
+      userData.stats = savedData;
+    }
+
+    function updateUI() {
+      if (isLoggedIn && userData.profile) {
+        // Hide login button
+        document.getElementById('loginBtn').style.display = 'none';
+        
+        // Show user profile
+        const userProfile = document.getElementById('userProfile');
+        userProfile.classList.add('active');
+        
+        // Update user info
+        document.getElementById('userName').textContent = userData.profile.name;
+        document.getElementById('userEmail').textContent = userData.profile.email;
+        document.getElementById('userAvatar').src = userData.profile.picture;
+        
+        // Show stats panel
+        document.getElementById('statsPanel').classList.add('active');
+        
+        // Update stats
+        document.getElementById('gamesPlayed').textContent = userData.stats.gamesPlayed;
+        document.getElementById('totalWins').textContent = userData.stats.totalWins;
+        document.getElementById('winRate').textContent = 
+          Math.round((userData.stats.totalWins / userData.stats.gamesPlayed) * 100) + '%';
+        document.getElementById('playTime').textContent = userData.stats.playTime + 'h';
+        
+        // Show game scores
+        document.getElementById('pongScore').style.display = 'block';
+        document.getElementById('pongScore').textContent = 'Best Score: ' + userData.stats.gameScores.pong;
+        
+        document.getElementById('snakeScore').style.display = 'block';
+        document.getElementById('snakeScore').textContent = 'Best Score: ' + userData.stats.gameScores.snake;
+        
+        document.getElementById('tictactoeScore').style.display = 'block';
+        document.getElementById('tictactoeScore').textContent = 'Wins: ' + userData.stats.gameScores.tictactoe;
+        
+        document.getElementById('raceScore').style.display = 'block';
+        document.getElementById('raceScore').textContent = 'Best Time: ' + userData.stats.gameScores.race;
+      } else {
+        // Show login button
+        document.getElementById('loginBtn').style.display = 'flex';
+        
+        // Hide user profile and stats
+        document.getElementById('userProfile').classList.remove('active');
+        document.getElementById('statsPanel').classList.remove('active');
+        
+        // Hide game scores
+        document.getElementById('pongScore').style.display = 'none';
+        document.getElementById('snakeScore').style.display = 'none';
+        document.getElementById('tictactoeScore').style.display = 'none';
+        document.getElementById('raceScore').style.display = 'none';
+      }
+    }
+
+    function signOut() {
+      if (confirm('Are you sure you want to sign out?')) {
+        isLoggedIn = false;
+        userData = {
+          profile: null,
+          stats: {
+            gamesPlayed: 0,
+            totalWins: 0,
+            playTime: 0,
+            gameScores: { pong: 0, snake: 0, tictactoe: 0, race: '--:--' }
+          }
+        };
+        
+        updateUI();
+        showNotification('👋 Successfully signed out!');
+      }
+    }
+
+    function handleGameClick(event, gameType) {
+      if (isLoggedIn) {
+        // Simulate game completion and score update
+        setTimeout(() => {
+          updateGameStats(gameType);
+        }, 2000);
+      }
+      // Let the normal link behavior continue
+    }
+
+    function updateGameStats(gameType) {
+      userData.stats.gamesPlayed++;
+      
+      // Random chance of winning
+      if (Math.random() > 0.4) {
+        userData.stats.totalWins++;
+        
+        // Update specific game score
+        switch(gameType) {
+          case 'pong':
+            userData.stats.gameScores.pong = Math.max(userData.stats.gameScores.pong, 
+              Math.floor(Math.random() * 5) + userData.stats.gameScores.pong);
+            break;
+          case 'snake':
+            userData.stats.gameScores.snake = Math.max(userData.stats.gameScores.snake, 
+              Math.floor(Math.random() * 50) + userData.stats.gameScores.snake);
+            break;
+          case 'tictactoe':
+            userData.stats.gameScores.tictactoe++;
+            break;
+          case 'race':
+            const newTime = (Math.random() * 60 + 20).toFixed(2);
+            if (parseFloat(newTime) < parseFloat(userData.stats.gameScores.race)) {
+              userData.stats.gameScores.race = newTime + 's';
+            }
+            break;
+        }
+      }
+      
+      userData.stats.playTime += Math.floor(Math.random() * 2) + 1;
+      
+      // Update UI
+      updateUI();
+      
+      // Save data notification
+      showNotification('💾 Game progress saved to your Google account!');
+    }
+
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #2a2a2a;
+        border: 2px solid #333333;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        z-index: 1001;
+        font-size: 14px;
+        animation: slideDown 0.3s ease-out;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      `;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideUp 0.3s ease-out forwards';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    // Search functionality (unchanged)
+    const searchInput = document.getElementById('searchInput');
+    const gameCards = document.querySelectorAll('.game-card');
+
+    searchInput.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      
+      gameCards.forEach((card) => {
+        const gameName = card.querySelector('.game-name').textContent.toLowerCase();
+        const gameDescription = card.querySelector('.game-description').textContent.toLowerCase();
+        const gameTags = card.dataset.tags.toLowerCase();
+        
+        if (gameName.includes(searchTerm) || 
+            gameDescription.includes(searchTerm) || 
+            gameTags.includes(searchTerm)) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    });
+
+    // Handle coming soon clicks
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.coming-soon')) {
+        e.preventDefault();
+        alert('🚧 This game is coming soon! Stay tuned for updates.');
+      }
+    });
+
+    // Add notification animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideUp {
+        to { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize UI
+    updateUI();
+  </script>
+</body>
+</html>
